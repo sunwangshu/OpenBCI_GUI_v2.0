@@ -30,6 +30,12 @@ import java.awt.event.*; //to allow for event listener on screen resize
 //                       Global Variables & Instances
 //------------------------------------------------------------------------
 
+// ss
+// Math Quiz open
+boolean mathQuizOn = false;
+Quiz q;
+// end ss
+
 //used to switch between application states
 int systemMode = 0; /* Modes: 0 = system stopped/control panel setings / 10 = gui / 20 = help guide */
 
@@ -218,6 +224,9 @@ void setup() {
   }
 
   myPresentation = new Presentation();
+  
+  // ss
+  q = new Quiz(0,0,width,height);
 }
 //====================== END-OF-SETUP ==========================//
 //====================== END-OF-SETUP ==========================//
@@ -454,6 +463,11 @@ void systemUpdate() { // for updating data values and variables
   }
 
   controlPanel.update();
+  
+  // ss
+  if (mathQuizOn) {
+    q.update();
+  }
 }
 
 void systemDraw() { //for drawing to the screen
@@ -547,4 +561,8 @@ void systemDraw() { //for drawing to the screen
   // use commented code below to verify frameRate and check latency
   // println("Time since start: " + millis() + " || Time since last frame: " + str(millis()-timeOfLastFrame));
   // timeOfLastFrame = millis();
+  
+  if (mathQuizOn) {
+    q.display();
+  }
 }

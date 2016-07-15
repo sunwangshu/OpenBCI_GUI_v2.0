@@ -53,6 +53,7 @@ class Playground {
 
   public void update() {
     // verbosePrint("uh huh");
+    println(q.keyOutput, q.stageOutput);
     if (collapsing) {
       collapse();
     } else {
@@ -74,6 +75,20 @@ class Playground {
     textAlign(LEFT, TOP);
     fill(bgColor);
     text("Developer Playground", x + 10, y + 10);
+    // ss 
+    if (isOpen) {
+      fill(184, 220, 105);
+      rectMode(CENTER);
+      rect(x + w*0.5, y + h*0.15, w*0.8, h*0.05);
+      rectMode(CORNER);
+      fill(0);
+      noStroke();
+      textSize(16);
+      textAlign(CENTER,CENTER);
+      text("Click to begin math quiz.", x + w*0.5, y + h*0.15);
+      textAlign(LEFT, BASELINE);
+    }
+    // end ss
     fill(255, 0, 0);
     collapser.draw(int(x - collapser.but_dx), int(topMargin + (h-collapser.but_dy)/2));
     popStyle();
@@ -111,6 +126,17 @@ class Playground {
   }
 
   public void mousePressed() {
+    // ss
+    // mathQuiz button
+    float x0 = x + w*0.5;
+    float y0 = y + h*0.15;
+    float w0 = w*0.8;
+    float h0 = h*0.05;
+    if (abs(mouseX - x0) < w0/2 && abs(mouseY - y0) < h0/2) {
+      q.startWorking();
+      mathQuizOn = true;
+    }
+    // end ss
     verbosePrint("Playground >> mousePressed()");
   }
 

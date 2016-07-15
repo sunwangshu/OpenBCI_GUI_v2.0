@@ -20,17 +20,26 @@ void keyPressed() {
   //note that the Processing variable "key" is the keypress as an ASCII character
   //note that the Processing variable "keyCode" is the keypress as a JAVA keycode.  This differs from ASCII  
   //println("OpenBCI_GUI: keyPressed: key = " + key + ", int(key) = " + int(key) + ", keyCode = " + keyCode);
-  
-  if(!controlPanel.isOpen){ //don't parse the key if the control panel is open
-    if ((int(key) >=32) && (int(key) <= 126)) {  //32 through 126 represent all the usual printable ASCII characters
-      parseKey(key);
-    } else {
-      parseKeycode(keyCode);
+  // ss
+  if (mathQuizOn) {
+    q.myKeyPressed();
+    if (key == TAB) {
+      q.stopWorking();
+      mathQuizOn = false;
     }
   }
-  
-  if(key==27){
-    key=0; //disable 'esc' quitting program
+  else {
+    if(!controlPanel.isOpen){ //don't parse the key if the control panel is open
+      if ((int(key) >=32) && (int(key) <= 126)) {  //32 through 126 represent all the usual printable ASCII characters
+        parseKey(key);
+      } else {
+        parseKeycode(keyCode);
+      }
+    }
+    
+    if(key==27){
+      key=0; //disable 'esc' quitting program
+    }
   }
 }
 
@@ -394,156 +403,163 @@ void parseKeycode(int val) {
 
 //swtich yard if a click is detected
 void mousePressed() {
-
-  verbosePrint("OpenBCI_GUI: mousePressed: mouse pressed");
-
-  //if not in initial setup...
-  if (systemMode >= 10) {
-
-    //limit interactivity of main GUI if control panel is open
-    if (controlPanel.isOpen == false) {
-      //was the stopButton pressed?
-
-      gui.mousePressed(); // trigger mousePressed function in GUI
-      //most of the logic below should be migrated into the GUI_Manager specific function above
-
-      if (gui.stopButton.isMouseHere()) { 
-        gui.stopButton.setIsActive(true);
-        stopButtonWasPressed();
-      }
-
-      // //was the gui page button pressed?
-      // if (gui.guiPageButton.isMouseHere()) {
-      //   gui.guiPageButton.setIsActive(true);
-      //   gui.incrementGUIpage();
-      // }
-
-      //check the buttons
-      switch (gui.guiPage) {
-      case GUI_Manager.GUI_PAGE_CHANNEL_ONOFF:
-        //check the channel buttons
-        // for (int Ibut = 0; Ibut < gui.chanButtons.length; Ibut++) {
-        //   if (gui.chanButtons[Ibut].isMouseHere()) { 
-        //     toggleChannelState(Ibut);
-        //   }
+  // ss
+  if (mathQuizOn) {
+    q.myMousePressed();
+  }
+  
+  else {
+    verbosePrint("OpenBCI_GUI: mousePressed: mouse pressed");
+  
+    //if not in initial setup...
+    if (systemMode >= 10) {
+  
+      //limit interactivity of main GUI if control panel is open
+      if (controlPanel.isOpen == false) {
+        //was the stopButton pressed?
+  
+        gui.mousePressed(); // trigger mousePressed function in GUI
+        //most of the logic below should be migrated into the GUI_Manager specific function above
+  
+        if (gui.stopButton.isMouseHere()) { 
+          gui.stopButton.setIsActive(true);
+          stopButtonWasPressed();
+        }
+  
+        // //was the gui page button pressed?
+        // if (gui.guiPageButton.isMouseHere()) {
+        //   gui.guiPageButton.setIsActive(true);
+        //   gui.incrementGUIpage();
         // }
-
-        //check the detection button
-        //if (gui.detectButton.updateIsMouseHere()) toggleDetectionState();      
-        //check spectrogram button
-        //if (gui.spectrogramButton.updateIsMouseHere()) toggleSpectrogramState();
-
-        break;
-      case GUI_Manager.GUI_PAGE_IMPEDANCE_CHECK:
-        // ============ DEPRECATED ============== //
-        // //check the impedance buttons
-        // for (int Ibut = 0; Ibut < gui.impedanceButtonsP.length; Ibut++) {
-        //   if (gui.impedanceButtonsP[Ibut].isMouseHere()) { 
-        //     toggleChannelImpedanceState(gui.impedanceButtonsP[Ibut],Ibut,0);
-        //   }
-        //   if (gui.impedanceButtonsN[Ibut].isMouseHere()) { 
-        //     toggleChannelImpedanceState(gui.impedanceButtonsN[Ibut],Ibut,1);
-        //   }
-        // }
-        // if (gui.biasButton.isMouseHere()) { 
-        //   gui.biasButton.setIsActive(true);
-        //   setBiasState(!openBCI.isBiasAuto);
-        // }      
-        // break;
-      case GUI_Manager.GUI_PAGE_HEADPLOT_SETUP:
-        if (gui.intensityFactorButton.isMouseHere()) {
-          gui.intensityFactorButton.setIsActive(true);
-          gui.incrementVertScaleFactor();
+  
+        //check the buttons
+        switch (gui.guiPage) {
+        case GUI_Manager.GUI_PAGE_CHANNEL_ONOFF:
+          //check the channel buttons
+          // for (int Ibut = 0; Ibut < gui.chanButtons.length; Ibut++) {
+          //   if (gui.chanButtons[Ibut].isMouseHere()) { 
+          //     toggleChannelState(Ibut);
+          //   }
+          // }
+  
+          //check the detection button
+          //if (gui.detectButton.updateIsMouseHere()) toggleDetectionState();      
+          //check spectrogram button
+          //if (gui.spectrogramButton.updateIsMouseHere()) toggleSpectrogramState();
+  
+          break;
+        case GUI_Manager.GUI_PAGE_IMPEDANCE_CHECK:
+          // ============ DEPRECATED ============== //
+          // //check the impedance buttons
+          // for (int Ibut = 0; Ibut < gui.impedanceButtonsP.length; Ibut++) {
+          //   if (gui.impedanceButtonsP[Ibut].isMouseHere()) { 
+          //     toggleChannelImpedanceState(gui.impedanceButtonsP[Ibut],Ibut,0);
+          //   }
+          //   if (gui.impedanceButtonsN[Ibut].isMouseHere()) { 
+          //     toggleChannelImpedanceState(gui.impedanceButtonsN[Ibut],Ibut,1);
+          //   }
+          // }
+          // if (gui.biasButton.isMouseHere()) { 
+          //   gui.biasButton.setIsActive(true);
+          //   setBiasState(!openBCI.isBiasAuto);
+          // }      
+          // break;
+        case GUI_Manager.GUI_PAGE_HEADPLOT_SETUP:
+          if (gui.intensityFactorButton.isMouseHere()) {
+            gui.intensityFactorButton.setIsActive(true);
+            gui.incrementVertScaleFactor();
+          }
+          if (gui.loglinPlotButton.isMouseHere()) {
+            gui.loglinPlotButton.setIsActive(true);
+            gui.set_vertScaleAsLog(!gui.vertScaleAsLog); //toggle the state
+          }
+          if (gui.filtBPButton.isMouseHere()) {
+            gui.filtBPButton.setIsActive(true);
+            incrementFilterConfiguration();
+          }
+          if (gui.filtNotchButton.isMouseHere()) {
+            gui.filtNotchButton.setIsActive(true);
+            incrementNotchConfiguration();
+          }
+          if (gui.smoothingButton.isMouseHere()) {
+            gui.smoothingButton.setIsActive(true);
+            incrementSmoothing();
+          }
+          if (gui.showPolarityButton.isMouseHere()) {
+            gui.showPolarityButton.setIsActive(true);
+            toggleShowPolarity();
+          }
+          if (gui.maxDisplayFreqButton.isMouseHere()) {
+            gui.maxDisplayFreqButton.setIsActive(true);
+            gui.incrementMaxDisplayFreq();
+          }
+          break;
+          //default:
         }
-        if (gui.loglinPlotButton.isMouseHere()) {
-          gui.loglinPlotButton.setIsActive(true);
-          gui.set_vertScaleAsLog(!gui.vertScaleAsLog); //toggle the state
+  
+        //check the graphs
+        if (gui.isMouseOnFFT(mouseX, mouseY)) {
+          GraphDataPoint dataPoint = new GraphDataPoint();
+          gui.getFFTdataPoint(mouseX, mouseY, dataPoint);
+          println("OpenBCI_GUI: FFT data point: " + String.format("%4.2f", dataPoint.x) + " " + dataPoint.x_units + ", " + String.format("%4.2f", dataPoint.y) + " " + dataPoint.y_units);
+        } else if (gui.headPlot1.isPixelInsideHead(mouseX, mouseY)) {
+          //toggle the head plot contours
+          gui.headPlot1.drawHeadAsContours = !gui.headPlot1.drawHeadAsContours;
+        } else if (gui.isMouseOnMontage(mouseX, mouseY)) {
+          //toggle the display of the montage values
+          gui.showMontageValues  = !gui.showMontageValues;
         }
-        if (gui.filtBPButton.isMouseHere()) {
-          gui.filtBPButton.setIsActive(true);
-          incrementFilterConfiguration();
-        }
-        if (gui.filtNotchButton.isMouseHere()) {
-          gui.filtNotchButton.setIsActive(true);
-          incrementNotchConfiguration();
-        }
-        if (gui.smoothingButton.isMouseHere()) {
-          gui.smoothingButton.setIsActive(true);
-          incrementSmoothing();
-        }
-        if (gui.showPolarityButton.isMouseHere()) {
-          gui.showPolarityButton.setIsActive(true);
-          toggleShowPolarity();
-        }
-        if (gui.maxDisplayFreqButton.isMouseHere()) {
-          gui.maxDisplayFreqButton.setIsActive(true);
-          gui.incrementMaxDisplayFreq();
-        }
-        break;
-        //default:
-      }
-
-      //check the graphs
-      if (gui.isMouseOnFFT(mouseX, mouseY)) {
-        GraphDataPoint dataPoint = new GraphDataPoint();
-        gui.getFFTdataPoint(mouseX, mouseY, dataPoint);
-        println("OpenBCI_GUI: FFT data point: " + String.format("%4.2f", dataPoint.x) + " " + dataPoint.x_units + ", " + String.format("%4.2f", dataPoint.y) + " " + dataPoint.y_units);
-      } else if (gui.headPlot1.isPixelInsideHead(mouseX, mouseY)) {
-        //toggle the head plot contours
-        gui.headPlot1.drawHeadAsContours = !gui.headPlot1.drawHeadAsContours;
-      } else if (gui.isMouseOnMontage(mouseX, mouseY)) {
-        //toggle the display of the montage values
-        gui.showMontageValues  = !gui.showMontageValues;
       }
     }
-  }
-
-  //=============================//
-  // CONTROL PANEL INTERACTIVITY //
-  //=============================//
-
-  //was control panel button pushed
-  if (controlPanelCollapser.isMouseHere()) {
-    if (controlPanelCollapser.isActive && systemMode == 10) {
-      controlPanelCollapser.setIsActive(false);
-      controlPanel.isOpen = false;
+  
+    //=============================//
+    // CONTROL PANEL INTERACTIVITY //
+    //=============================//
+  
+    //was control panel button pushed
+    if (controlPanelCollapser.isMouseHere()) {
+      if (controlPanelCollapser.isActive && systemMode == 10) {
+        controlPanelCollapser.setIsActive(false);
+        controlPanel.isOpen = false;
+      } else {
+        controlPanelCollapser.setIsActive(true);
+        controlPanel.isOpen = true;
+      }
     } else {
-      controlPanelCollapser.setIsActive(true);
-      controlPanel.isOpen = true;
-    }
-  } else {
-    if (controlPanel.isOpen) {
-      controlPanel.CPmousePressed();
-    }
-  }
-
-  //interacting with control panel
-  if (controlPanel.isOpen) {
-    //close control panel if you click outside...
-    if (systemMode == 10) {
-      if (mouseX > 0 && mouseX < controlPanel.w && mouseY > 0 && mouseY < controlPanel.initBox.y+controlPanel.initBox.h) {
-        println("OpenBCI_GUI: mousePressed: clicked in CP box");
+      if (controlPanel.isOpen) {
         controlPanel.CPmousePressed();
       }
-      //if clicked out of panel
-      else {
-        println("OpenBCI_GUI: mousePressed: outside of CP clicked");
-        controlPanel.isOpen = false;
-        controlPanelCollapser.setIsActive(false);
-        output("Press the \"Press to Start\" button to initialize the data stream.");
+    }
+  
+    //interacting with control panel
+    if (controlPanel.isOpen) {
+      //close control panel if you click outside...
+      if (systemMode == 10) {
+        if (mouseX > 0 && mouseX < controlPanel.w && mouseY > 0 && mouseY < controlPanel.initBox.y+controlPanel.initBox.h) {
+          println("OpenBCI_GUI: mousePressed: clicked in CP box");
+          controlPanel.CPmousePressed();
+        }
+        //if clicked out of panel
+        else {
+          println("OpenBCI_GUI: mousePressed: outside of CP clicked");
+          controlPanel.isOpen = false;
+          controlPanelCollapser.setIsActive(false);
+          output("Press the \"Press to Start\" button to initialize the data stream.");
+        }
       }
+    }
+  
+    redrawScreenNow = true;  //command a redraw of the GUI whenever the mouse is pressed
+  
+    if (playground.isMouseHere()) {
+      playground.mousePressed();
+    }
+  
+    if (playground.isMouseInButton()) {
+      playground.toggleWindow();
     }
   }
 
-  redrawScreenNow = true;  //command a redraw of the GUI whenever the mouse is pressed
-
-  if (playground.isMouseHere()) {
-    playground.mousePressed();
-  }
-
-  if (playground.isMouseInButton()) {
-    playground.toggleWindow();
-  }
 }
 
 void mouseReleased() {

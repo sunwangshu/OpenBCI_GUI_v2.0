@@ -146,6 +146,9 @@ public class OutputFile_rawtxt {
     output.println("%Sample Rate = " + fs_Hz + " Hz");
     output.println("%First Column = SampleIndex");
     output.println("%Other Columns = EEG data in microvolts followed by Accel Data (in G) interleaved with Aux Data");
+    output.println("%Last Two Columns = keyOutput & stageOutput in Math test.");
+    output.println("%Key: 0/1 means key up/down. Stage: -1 not in test; 0 waiting; 1 testing; 20 answered and wrong; 21 answered and correct.");
+    
     output.flush();
   }
 
@@ -158,6 +161,12 @@ public class OutputFile_rawtxt {
       output.print(Integer.toString(data.sampleIndex));
       writeValues(data.values,scale_to_uV);
       writeValues(data.auxValues,scale_for_aux);
+      // ss
+      output.print(", ");
+      output.print(int(q.keyOutput));
+      output.print(", ");
+      output.print(int(q.stageOutput));
+      // end ss
       output.println(); rowsWritten++;
       //output.flush();
     }
