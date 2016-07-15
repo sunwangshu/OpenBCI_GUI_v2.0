@@ -37,7 +37,9 @@ Quiz q;
 // end ss
 
 //used to switch between application states
-int systemMode = 0; /* Modes: 0 = system stopped/control panel setings / 10 = gui / 20 = help guide */
+int systemMode = -10; /* Modes: -10 = intro sequence; 0 = system stopped/control panel setings; 10 = gui; 20 = help guide */
+boolean hasIntroAnimation = true;
+PImage cog;
 
 //choose where to get the EEG data
 final int DATASOURCE_NORMAL = 3;  //looking for signal from OpenBCI board via Serial/COM port, no Aux data
@@ -159,7 +161,7 @@ void setup() {
   //if (frame != null) frame.setResizable(true);  //make window resizable
   //attach exit handler
   //prepareExitHandler();
-  frameRate(30); //refresh rate ... this will slow automatically, if your processor can't handle the specified rate
+  frameRate(120); //refresh rate ... this will slow automatically, if your processor can't handle the specified rate
   smooth(); //turn this off if it's too slow
 
   surface.setResizable(true);  //updated from frame.setResizable in Processing 2
@@ -210,6 +212,7 @@ void setup() {
   //Once the hardware is synchronized, the main GUI is drawn and the user switches over to the main GUI.
 
   logo = loadImage("logo2.png");
+  cog = loadImage("cog_1024x1024.png");
 
   playground = new Playground(navBarHeight);
 
@@ -237,11 +240,10 @@ void setup() {
 //======================== DRAW LOOP =============================//
 
 void draw() {
-  
+
   drawLoop_counter++; //signPost("10");
   systemUpdate(); //signPost("20");
   systemDraw();   //signPost("30");
-
 }
 
 //====================== END-OF-DRAW ==========================//
@@ -523,8 +525,6 @@ void systemDraw() { //for drawing to the screen
     playground.draw();
     dataProcessing_user.draw();
     drawContainers();
-    
-
   } else { //systemMode != 10
     //still print title information about fps
     surface.setTitle(int(frameRate) + " fps — OpenBCI GUI");
@@ -565,4 +565,37 @@ void systemDraw() { //for drawing to the screen
   if (mathQuizOn) {
     q.display();
   }
+
+  if (systemMode == -10) {
+    //intro animation sequence
+    if (hasIntroAnimation) {
+      introAnimation();
+    } else {
+      systemMode = 0;
+    }
+  }
+}
+
+void introAnimation() {
+  pushStyle();
+  imageMode(CENTER);
+  background(255);
+  int t1 = 4000;
+  int t2 = 6000;
+  int t3 = 8000;
+  float transparency = 0;
+
+  if (millis() >= t1) {
+    transparency = map(millis(), t1, t2, 0, 255);
+    tint(255, transparency);
+    //draw OpenBCI Logo Front & Center
+    image(cog, width/2, height/2, width/6, width/6);
+  }
+
+  //exit intro animation at t2
+  if (millis() >= t3) {
+    systemMode = 0;
+    controlPanel.isOpen = true;
+  }
+  popStyle();
 }
