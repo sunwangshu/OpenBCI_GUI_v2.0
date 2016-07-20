@@ -32,6 +32,9 @@ class Playground {
   boolean collapsing;
 
   Button collapser;
+  
+  // focus detector
+  FocusDetector focusDetector;
 
   Playground(int _topMargin) {
 
@@ -48,7 +51,10 @@ class Playground {
     x = width;
     y = topMargin;
     w = 0;
-    h = height - (topMargin+bottomMargin);
+    h = height - (topMargin+bottomMargin);  
+      
+    // focus detector
+    focusDetector = new FocusDetector(x,y + h/4,w,h/2);
   }
 
   public void update() {
@@ -62,6 +68,8 @@ class Playground {
     if (x > width) {
       x = width;
     }
+    // focus detector
+    focusDetector.update(x,y + h/4,w,h/2);
   }
 
   public void draw() {
@@ -76,6 +84,10 @@ class Playground {
     text("Developer Playground", x + 10, y + 10);
     fill(255, 0, 0);
     collapser.draw(int(x - collapser.but_dx), int(topMargin + (h-collapser.but_dy)/2));
+    // focus detector
+    if (isOpen) {
+    focusDetector.draw();
+    }
     popStyle();
   }
 
@@ -111,11 +123,16 @@ class Playground {
   }
 
   public void mousePressed() {
+    focusDetector.mousePressed();
     verbosePrint("Playground >> mousePressed()");
   }
 
   public void mouseReleased() {
     verbosePrint("Playground >> mouseReleased()");
+  }
+
+  public void keyPressed() {
+    focusDetector.keyPressed();
   }
 
   public void expand() {
