@@ -37,11 +37,12 @@ class DataProcessing_User {
   boolean isTriggered_R = false;
   float upperThreshold_R= 12;  //default uV upper threshold value ... this will automatically change over time
   float lowerThreshold_R = 0;  //default uV lower threshold value ... this will automatically change over time
-  int averagePeriod_R = 10;  //number of data packets to average over (250 = 1 sec)
+  int averagePeriod_R = 5;  //number of data packets to average over (250 = 1 sec)
   int thresholdPeriod_R = 1250;  //number of packets
   int ourChan_R = 2 - 1;  //channel being monitored ... "3 - 1" means channel 3 (with a 0 index)
   float myAverage_R = 0.0;   //this will change over time ... used for calculations below
-  float acceptableLimitUV_R = 200;  //uV values above this limit are excluded, as a result of them almost certainly being noise... 
+  float acceptableLimitUV_R = 400;  //uV values above this limit are excluded, as a result of them almost certainly being noise... 
+  float acceptableLimitUV_R_lower = 0;  //uV values above this limit are excluded, as a result of them almost certainly being noise...
   int uncounted_R = 0;
   //prez related
   boolean switchTripped_R = false;
@@ -201,7 +202,7 @@ class DataProcessing_User {
     }
     if (upperThreshold_R >= myAverage_R + 35) {
       //upperThreshold_R -= (upperThreshold_R - 25)/(frameRate * 5); //have upper threshold creep downwards to keep range tight
-      upperThreshold_R *= .95;
+      upperThreshold_R *= .97;
     }
     if (lowerThreshold_R <= myAverage_R) {
       lowerThreshold_R += (10 - lowerThreshold_R)/(frameRate * 5); //have lower threshold creep upwards to keep range tight
@@ -220,16 +221,25 @@ class DataProcessing_User {
         switchCounter_L = 1;
       }
 
-      if (output_normalized_R >= tripThreshold_R && switchTripped_R == false && (millis() - timeOfLastTrip_R) >= 20 && switchTripped_L == false) {
-        println("switchTripped_R = true");
+      if (millis() - timeOfLastTrip_R >= 5) {
+        switchTripped_R = false;
+        robot.keyRelease(KeyEvent.VK_SPACE);
+        //println("off");
+        switchCounter_R = 0;
+      }
+
+      if (output_normalized_R >= tripThreshold_R && switchTripped_R == false && (millis() - timeOfLastTrip_R) >= 5 && switchTripped_L == false) {  // && myAverage_R >= acceptableLimitUV_R_lower
+        //println("switchTripped_R = true");
+        println(myAverage_R);
         switchTripped_R = true;
         robot.keyPress(KeyEvent.VK_SPACE);
+        //println("on");
         timeOfLastTrip_R = millis();
         switchCounter_R = 1;
       }
-      if ((millis() - timeOfLastTrip_R) >= 0 && (millis() - timeOfLastTrip_R) <= 20) {
+      if ((millis() - timeOfLastTrip_R) >= 0 && (millis() - timeOfLastTrip_R) <= 0) {
         println("sweet zone R");
-        robot.keyPress(KeyEvent.VK_SPACE);
+        //robot.keyRelease(KeyEvent.VK_SPACE);
         if (switchTripped_L) {
           switchTripped_L = false;
           myPresentation.slideBack();
@@ -247,11 +257,7 @@ class DataProcessing_User {
         switchTripped_L = false;
         switchCounter_L = 0;
       }
-      if (millis() - timeOfLastTrip_R >= 15) {
-        switchTripped_R = false;
-        robot.keyRelease(KeyEvent.VK_SPACE);
-        switchCounter_R = 0;
-      }
+
       //============================= JAW ===================================
       if (output_normalized >= tripThreshold && switchTripped == false && millis() - timeOfLastTrip >= 750) {
         switchTripped = true; 
