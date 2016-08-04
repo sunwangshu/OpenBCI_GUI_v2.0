@@ -250,67 +250,70 @@ class HeadPlot_Widget {
   }
 
   void draw() {
-    pushStyle();
-    noStroke();
-
-    fill(255);
-    rect(x, y, w, h); //widget background
-    //fill(150,150,150);
-    //rect(x, y, w, navHeight); //top bar
-    //fill(200, 200, 200);
-    //rect(x, y+navHeight, w, navHeight); //top bar
-    //fill(bgColor);
-    //textSize(18);
-    //text("Head Plot", x+w/2, y+navHeight/2);
-    ////fill(255,0,0,150);
-    ////rect(x,y,w,h);
-
-    fill(150, 150, 150);
-    rect(x, y, w, navHeight); //top bar
-    fill(200, 200, 200);
-    rect(x, y+navHeight, w, navHeight); //button bar
-    fill(255);
-    rect(x+2, y+2, navHeight-4, navHeight-4);
-    fill(bgColor, 100);
-    //rect(x+3,y+3, (navHeight-7)/2, navHeight-10);
-    rect(x+4, y+4, (navHeight-10)/2, (navHeight-10)/2);
-    rect(x+4, y+((navHeight-10)/2)+5, (navHeight-10)/2, (navHeight-10)/2);
-    rect(x+((navHeight-10)/2)+5, y+4, (navHeight-10)/2, (navHeight-10)/2);
-    rect(x+((navHeight-10)/2)+5, y+((navHeight-10)/2)+5, (navHeight-10)/2, (navHeight-10 )/2);
-    //text("FFT Plot", x+w/2, y+navHeight/2)
-    fill(bgColor);
-    textAlign(LEFT, CENTER);
-    textFont(f);
-    textSize(18);
-    text("Head Plot", x+navHeight+2, y+navHeight/2 - 2); //left
-    //textAlign(CENTER,CENTER); text("FFT Plot", w/2, y+navHeight/2 - 2); //center
-    //fill(255,0,0,150);
-    //rect(x,y,w,h);
-
-    headPlot.draw(); //draw the actual headplot
-
-    //draw dropdown titles
-    int dropdownPos = 3; //used to loop through drop down titles ... should use for loop with titles in String array, but... laziness has ensued. -Conor
-    int dropdownWidth = 60;
-    textFont(f2);
-    textSize(12);
-    textAlign(CENTER, BOTTOM);
-    fill(bgColor);
-    text("Layout", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
-    dropdownPos = 2;
-    text("Headset", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
-    //dropdownPos = 3;
-    //text("# Chan.", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
-    dropdownPos = 1;
-    text("Polarity", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
-    dropdownPos = 0;
-    text("Smoothing", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
-    //dropdownPos = 0;
-    //text("Filters?", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
-
-    cp5_HeadPlot.draw(); //draw all dropdown menus
-
-    popStyle();
+    
+    if(!drawEMG){
+      pushStyle();
+      noStroke();
+  
+      fill(255);
+      rect(x, y, w, h); //widget background
+      //fill(150,150,150);
+      //rect(x, y, w, navHeight); //top bar
+      //fill(200, 200, 200);
+      //rect(x, y+navHeight, w, navHeight); //top bar
+      //fill(bgColor);
+      //textSize(18);
+      //text("Head Plot", x+w/2, y+navHeight/2);
+      ////fill(255,0,0,150);
+      ////rect(x,y,w,h);
+  
+      fill(150, 150, 150);
+      rect(x, y, w, navHeight); //top bar
+      fill(200, 200, 200);
+      rect(x, y+navHeight, w, navHeight); //button bar
+      fill(255);
+      rect(x+2, y+2, navHeight-4, navHeight-4);
+      fill(bgColor, 100);
+      //rect(x+3,y+3, (navHeight-7)/2, navHeight-10);
+      rect(x+4, y+4, (navHeight-10)/2, (navHeight-10)/2);
+      rect(x+4, y+((navHeight-10)/2)+5, (navHeight-10)/2, (navHeight-10)/2);
+      rect(x+((navHeight-10)/2)+5, y+4, (navHeight-10)/2, (navHeight-10)/2);
+      rect(x+((navHeight-10)/2)+5, y+((navHeight-10)/2)+5, (navHeight-10)/2, (navHeight-10 )/2);
+      //text("FFT Plot", x+w/2, y+navHeight/2)
+      fill(bgColor);
+      textAlign(LEFT, CENTER);
+      textFont(f);
+      textSize(18);
+      text("Head Plot", x+navHeight+2, y+navHeight/2 - 2); //left
+      //textAlign(CENTER,CENTER); text("FFT Plot", w/2, y+navHeight/2 - 2); //center
+      //fill(255,0,0,150);
+      //rect(x,y,w,h);
+  
+      headPlot.draw(); //draw the actual headplot
+  
+      //draw dropdown titles
+      int dropdownPos = 4; //used to loop through drop down titles ... should use for loop with titles in String array, but... laziness has ensued. -Conor
+      int dropdownWidth = 60;
+      textFont(f2);
+      textSize(12);
+      textAlign(CENTER, BOTTOM);
+      fill(bgColor);
+      text("Layout", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
+      dropdownPos = 3;
+      text("Headset", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
+      //dropdownPos = 3;
+      //text("# Chan.", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
+      dropdownPos = 2;
+      text("Polarity", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
+      dropdownPos = 1;
+      text("Smoothing", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
+      dropdownPos = 0;
+      text("Filters?", x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1))+dropdownWidth/2, y+(navHeight-2));
+  
+      cp5_HeadPlot.draw(); //draw all dropdown menus
+  
+      popStyle();
+    }
   }
 
   void screenResized(PApplet _parent, int _winX, int _winY) {
@@ -329,104 +332,57 @@ class HeadPlot_Widget {
     //update dropdown menu positions
     int dropdownPos;
     int dropdownWidth = 60;
-    dropdownPos = 4; //work down from 4 since we're starting on the right side now...
+    dropdownPos = 3; //work down from 4 since we're starting on the right side now...
     cp5_HeadPlot.getController("Ten20")
       //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
       .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
       //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
       ;
-    dropdownPos = 3; //work down from 4 since we're starting on the right side now...
+    dropdownPos = 2; //work down from 4 since we're starting on the right side now...
     cp5_HeadPlot.getController("Headset")
       //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
       .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
       //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
       ;
-    //dropdownPos = 3;
+    //dropdownPos = 2;
     //cp5_HeadPlot.getController("NumChan")
     //  //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
     //  .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
     //  //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
     //  ;
-    dropdownPos = 2;
+    dropdownPos = 1;
     cp5_HeadPlot.getController("Polarity")
       //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
       .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
       //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
       ;
-    dropdownPos = 1;
+    dropdownPos = 0;
     cp5_HeadPlot.getController("SmoothingHeadPlot")
       //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
       .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
       //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
       ;
-    dropdownPos = 0;
-    cp5_HeadPlot.getController("UnfiltFiltHeadPlot")
-      //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
-      .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
-      //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
-      ;
+    //dropdownPos = 0;
+    //cp5_HeadPlot.getController("UnfiltFiltHeadPlot")
+    //  //.setPosition(w-(dropdownWidth*dropdownPos)-(2*(dropdownPos+1)), navHeight+(y+2)) // float left
+    //  .setPosition(x+w-(dropdownWidth*(dropdownPos+1))-(2*(dropdownPos+1)), navHeight+(y+2)) //float right
+    //  //.setSize(dropdownWidth, (maxFreqList.size()+1)*(navBarHeight-4))
+    //  ;
   }
 
   public void setSmoothFac(float fac) {
     headPlot.smooth_fac = fac;
   }
 
-  //triggered when there is an event in the Ten20 Dropdown
-  void Ten20(int n) {
-    /* here an item is stored as a Map  with the following key-value pairs:
-     * name, the given name of the item
-     * text, the given text of the item by default the same as name
-     * value, the given value of the item, can be changed by using .getItem(n).put("value", "abc"); a value here is of type Object therefore can be anything
-     * color, the given color of the item, how to change, see below
-     * view, a customizable view, is of type CDrawable 
-     */
-
-    //fft_widget.fft_plot.setXLim(0.1, fft_widget.xLimOptions[n]); //update the xLim of the FFT_Plot
-    println("BOOOOM!" + n);
-  }
-
-  //triggered when there is an event in the Headset Dropdown
-  void Headset(int n) {
-    //fft_widget.fft_plot.setYLim(0.1, fft_widget.yLimOptions[n]); //update the yLim of the FFT_Plot
-  }
-
-  //triggered when there is an event in the NumChan Dropdown
-  void NumChan(int n) {
-    //if (n==0) {
-    //  fft_widget.fft_plot.setLogScale("y");
-    //} else {
-    //  fft_widget.fft_plot.setLogScale("");
-    //}
-  }
-
-  //triggered when there is an event in the Polarity Dropdown
-  void Polarity(int n) {
-
-    if (n==0) {
-      headPlot_widget.headPlot.use_polarity = true;
-    } else {
-      headPlot_widget.headPlot.use_polarity = false;
-    }
-  }
-
-  //triggered when there is an event in the SmoothingHeadPlot Dropdown
-  void SmoothingHeadPlot(int n) {
-    headPlot_widget.setSmoothFac(smoothFac[n]);
-  }
-
-  //triggered when there is an event in the UnfiltFiltHeadPlot Dropdown
-  void UnfiltFiltHeadPlot(int n) {
-  }
-
   void mousePressed() {
     //called by GUI_Widgets.pde
     if(mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h){
-      println("headPlot.mousePressed()");
+      //println("headPlot.mousePressed()");
     }
   }
   void mouseReleased() {
     //called by GUI_Widgets.pde
-    if(mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h){
+    if (mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h) {
       println("headPlot.mouseReleased()");
     }
   }
@@ -438,7 +394,52 @@ class HeadPlot_Widget {
   }
 };
 
+//triggered when there is an event in the Ten20 Dropdown
+void Ten20(int n) {
+  /* here an item is stored as a Map  with the following key-value pairs:
+   * name, the given name of the item
+   * text, the given text of the item by default the same as name
+   * value, the given value of the item, can be changed by using .getItem(n).put("value", "abc"); a value here is of type Object therefore can be anything
+   * color, the given color of the item, how to change, see below
+   * view, a customizable view, is of type CDrawable 
+   */
 
+  //fft_widget.fft_plot.setXLim(0.1, fft_widget.xLimOptions[n]); //update the xLim of the FFT_Plot
+  println("BOOOOM!" + n);
+}
+
+//triggered when there is an event in the Headset Dropdown
+void Headset(int n) {
+  //fft_widget.fft_plot.setYLim(0.1, fft_widget.yLimOptions[n]); //update the yLim of the FFT_Plot
+}
+
+//triggered when there is an event in the NumChan Dropdown
+void NumChan(int n) {
+  //if (n==0) {
+  //  fft_widget.fft_plot.setLogScale("y");
+  //} else {
+  //  fft_widget.fft_plot.setLogScale("");
+  //}
+}
+
+//triggered when there is an event in the Polarity Dropdown
+void Polarity(int n) {
+
+  if (n==0) {
+    headPlot_widget.headPlot.use_polarity = true;
+  } else {
+    headPlot_widget.headPlot.use_polarity = false;
+  }
+}
+
+//triggered when there is an event in the SmoothingHeadPlot Dropdown
+void SmoothingHeadPlot(int n) {
+  headPlot_widget.setSmoothFac(smoothFac[n]);
+}
+
+//triggered when there is an event in the UnfiltFiltHeadPlot Dropdown
+void UnfiltFiltHeadPlot(int n) {
+}
 
 
 

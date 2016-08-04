@@ -1,3 +1,4 @@
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //   GUI for controlling the ADS1299-based OpenBCI
@@ -15,9 +16,7 @@
 //   No warranty. Use at your own risk. Use for whatever you'd like.
 // 
 ////////////////////////////////////////////////////////////////////////////////
-
-import ddf.minim.analysis.*; //for FFT
-//import ddf.minim.*;  // commented because too broad.. contains "Controller" class which is also contained in ControlP5... need to be more specific // To make sound.  Following minim example "frequencyModulation"
+import ddf.minim.*;  // To make sound.  Following minim example "frequencyModulation"
 import ddf.minim.ugens.*; // To make sound.  Following minim example "frequencyModulation"
 import java.lang.Math; //for exp, log, sqrt...they seem better than Processing's built-in
 import processing.core.PApplet;
@@ -25,6 +24,36 @@ import java.util.*; //for Array.copyOfRange()
 import java.util.Map.Entry; 
 import processing.serial.*; //for serial communication to Arduino/OpenBCI
 import java.awt.event.*; //to allow for event listener on screen resize
+import netP5.*; //for OSC networking
+import oscP5.*; //for OSC networking
+import hypermedia.net.*; //for UDP networking
+import grafica.*;
+
+
+//import java.awt.*;
+//import java.awt.Point;
+import java.awt.MouseInfo;
+//import processing.core.PConstants;
+//import java.awt.Window;
+//import java.awt.Component;
+//import java.awt.Container;
+
+//package processing.opengl;
+//import java.awt.Component.*;
+//import java.awt.GraphicsDevice;
+//import java.awt.GraphicsEnvironment;
+//import java.awt.Point;
+//import java.awt.Rectangle;
+//import java.awt.image.BufferedImage;
+//import java.awt.image.DataBufferInt;
+
+//import processing.opengl.GLWindow;
+//import com.sun.javafx.newt.opengl.GLWindow;
+//import Graphics.Rendering.OpenGL;
+//import java.awt.Graphics.UI.GLWindow;      
+//import qualified Graphics.UI.GLWindow as Window;   
+//import com.sun.javafx.newt.opengl.GLWindow;
+
 
 //------------------------------------------------------------------------
 //                       Global Variables & Instances
@@ -83,7 +112,9 @@ int newPacketCounter = 0;
 long timeOfInit;
 long timeSinceStopRunning = 1000;
 int prev_time_millis = 0;
-final int nPointsPerUpdate = 50; //update the GUI after this many data points have been received 
+
+//final int nPointsPerUpdate = 50; //update the GUI after this many data points have been received 
+final int nPointsPerUpdate = 24; //update the GUI after this many data points have been received 
 
 //define some data fields for handling data here in processing
 float dataBuffX[];  //define the size later
@@ -98,6 +129,16 @@ OutputFile_rawtxt fileoutput;
 String output_fname;
 String fileName = "N/A";
 
+//variables for Networking
+int port = 0;
+String ip = "";
+String address = "";
+String data_stream = "";
+String aux_stream = "";
+UDPSend udp;
+OSCSend osc;
+LSLSend lsl;
+
 // Serial output
 String serial_output_portName = "/dev/tty.usbmodem1411";  //must edit this based on the name of the serial/COM port
 Serial serial_output;
@@ -111,7 +152,15 @@ PlotFontInfo fontInfo;
 boolean isRunning = false;
 boolean redrawScreenNow = true;
 int openBCI_byteCount = 0;
-int inByte = -1;    // Incoming serial data
+byte inByte = -1;    // Incoming serial data
+StringBuilder board_message;
+StringBuilder scanning_message;
+
+int dollaBillz;
+boolean isGettingPoll = false;
+boolean spaceFound = false;
+boolean scanningChannels = false;
+int hexToInt = 0;
 
 //for screen resizing
 boolean screenHasBeenResized = false;
@@ -119,7 +168,7 @@ float timeOfLastScreenResize = 0;
 float timeOfGUIreinitialize = 0;
 int reinitializeGUIdelay = 125;
 //Tao's variabiles
-int widthOfLastScreen = 0;
+int widthOfLastScreen = 0;      
 int heightOfLastScreen = 0;
 
 //set window size
@@ -131,6 +180,12 @@ PImage logo;
 PFont f1;
 PFont f2;
 PFont f3;
+
+EMG_Widget motorWidget;
+
+boolean no_start_connection = false;
+boolean has_processed = false;
+boolean isOldData = false;
 
 //------------------------------------------------------------------------
 //                       Global Functions
@@ -150,7 +205,7 @@ void setup() {
   //if (frame != null) frame.setResizable(true);  //make window resizable
   //attach exit handler
   //prepareExitHandler();
-  frameRate(30); //refresh rate ... this will slow automatically, if your processor can't handle the specified rate
+  frameRate(60); //refresh rate ... this will slow automatically, if your processor can't handle the specified rate
   smooth(); //turn this off if it's too slow
 
   surface.setResizable(true);  //updated from frame.setResizable in Processing 2
@@ -264,6 +319,9 @@ void initSystem() {
   }
   dataProcessing = new DataProcessing(nchan, openBCI.get_fs_Hz());
   dataProcessing_user = new DataProcessing_User(nchan, openBCI.get_fs_Hz());
+  
+  
+
 
   //initialize the data
   prepareData(dataBuffX, dataBuffY_uV, openBCI.get_fs_Hz());
@@ -274,7 +332,7 @@ void initSystem() {
   for (int Ichan=0; Ichan < nchan; Ichan++) { 
     verbosePrint("a--"+Ichan);
     fftBuff[Ichan] = new FFT(Nfft, openBCI.get_fs_Hz());
-  };  //make the FFT objects
+  }  //make the FFT objects
   verbosePrint("OpenBCI_GUI: initSystem: b");
   initializeFFTObjects(fftBuff, dataBuffY_uV, Nfft, openBCI.get_fs_Hz());
 
@@ -309,7 +367,6 @@ void initSystem() {
       exit();
     }
     println("OpenBCI_GUI: initSystem: loading complete.  " + playbackData_table.getRowCount() + " rows of data, which is " + round(float(playbackData_table.getRowCount())/openBCI.get_fs_Hz()) + " seconds of EEG data");
-
     //removing first column of data from data file...the first column is a time index and not eeg data
     playbackData_table.removeColumn(0);
     break;
@@ -432,6 +489,16 @@ void systemUpdate() { // for updating data values and variables
       } else {
         //not enough data has arrived yet... only update the channel controller
       }
+    }else if(eegDataSource == DATASOURCE_PLAYBACKFILE && !has_processed && !isOldData) {
+      lastReadDataPacketInd = 0;
+      pointCounter = 0;
+      try{
+        process_input_file();
+      }
+      catch(Exception e){
+        isOldData = true;
+        output("Error processing timestamps, are you using old data?");
+      }
     }
 
     gui.cc.update(); //update Channel Controller even when not updating certain parts of the GUI... (this is a bit messy...)
@@ -446,7 +513,7 @@ void systemUpdate() { // for updating data values and variables
     }
 
     //re-initialize GUI if screen has been resized and it's been more than 1/2 seccond (to prevent reinitialization of GUI from happening too often)
-    if(screenHasBeenResized){
+    if (screenHasBeenResized) {
       GUIWidgets_screenResized(width, height);
     }
     if (screenHasBeenResized == true && (millis() - timeOfLastScreenResize) > reinitializeGUIdelay) {
@@ -521,9 +588,10 @@ void systemDraw() { //for drawing to the screen
       println("OpenBCI_GUI: systemDraw: reinitializing GUI after resize... not drawing GUI");
     }
 
+    playground.draw();
 
-    dataProcessing_user.draw();
-    //playground.draw();
+    motorWidget.draw();
+    //dataProcessing_user.draw();
     drawContainers();
   } else { //systemMode != 10
     //still print title information about fps
@@ -555,7 +623,8 @@ void systemDraw() { //for drawing to the screen
 
   if (drawPresentation) {
     myPresentation.draw();
-    dataProcessing_user.drawTriggerFeedback();
+    motorWidget.drawTriggerFeedback();
+    //dataProcessing_user.drawTriggerFeedback();
   }
 
   // use commented code below to verify frameRate and check latency
@@ -570,6 +639,8 @@ void systemDraw() { //for drawing to the screen
       systemMode = 0;
     }
   }
+
+  mouseOutOfBounds(); // to fix
 }
 
 void introAnimation() {
@@ -595,3 +666,58 @@ void introAnimation() {
   }
   popStyle();
 }
+
+//CODE FOR FIXING WEIRD EXIT CRASH ISSUE -- 7/27/16 ===========================
+boolean mouseInFrame = false;
+boolean windowOriginSet = false;
+int appletOriginX = 0;
+int appletOriginY = 0;
+PVector loc;
+
+void mouseOutOfBounds() {
+  if (windowOriginSet && mouseInFrame) {
+    //if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+    //  println("mouseX " + mouseX);
+    //  println("mouseY " + mouseY);
+    //  println("true X " + MouseInfo.getPointerInfo().getLocation().x); 
+    //  println("true Y " + MouseInfo.getPointerInfo().getLocation().y);
+    //  println("Window X " + loc.x); 
+    //  println("Window Y " + loc.y);
+    //  println();
+    //} 
+    if (MouseInfo.getPointerInfo().getLocation().x <= appletOriginX || 
+      MouseInfo.getPointerInfo().getLocation().x >= appletOriginX+width ||
+      MouseInfo.getPointerInfo().getLocation().y <= appletOriginY ||
+      MouseInfo.getPointerInfo().getLocation().y >= appletOriginY+height) {
+      mouseX = 0;
+      mouseY = 0;
+      println("Mouse out of bounds!");
+      mouseInFrame = false;
+    }
+  } else {
+    if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+      loc = getWindowLocation(P2D);
+      appletOriginX = (int)loc.x;
+      appletOriginY = (int)loc.y;
+      windowOriginSet = true;
+      mouseInFrame = true;
+      println("WINDOW ORIGIN SET!");
+    }
+  }
+}
+
+PVector getWindowLocation(String renderer) {
+  PVector l = new PVector();
+  if (renderer == P2D || renderer == P3D) {
+    com.jogamp.nativewindow.util.Point p = new com.jogamp.nativewindow.util.Point();
+    ((com.jogamp.newt.opengl.GLWindow)surface.getNative()).getLocationOnScreen(p);
+    l.x = p.getX();
+    l.y = p.getY();
+  } else if (renderer == JAVA2D) {
+    java.awt.Frame f =  (java.awt.Frame) ((processing.awt.PSurfaceAWT.SmoothCanvas) surface.getNative()).getFrame();
+    l.x = f.getX();
+    l.y = f.getY();
+  }
+  return l;
+}
+//END OF CODE FOR FIXING WEIRD EXIT CRASH ISSUE -- 7/27/16 ===========================
