@@ -59,6 +59,13 @@ import java.awt.MouseInfo;
 //                       Global Variables & Instances
 //------------------------------------------------------------------------
 
+// acc test
+float [] validAuxValues = {0,0,0};
+float[] X_buff;
+float[] Y_buff;       
+float[] Z_buff;
+boolean acc_newData = false;
+
 //used to switch between application states
 int systemMode = -10; /* Modes: -10 = intro sequence; 0 = system stopped/control panel setings; 10 = gui; 20 = help guide */
 
@@ -308,6 +315,9 @@ void initSystem() {
   dataBuffX = new float[(int)(dataBuff_len_sec * openBCI.get_fs_Hz())];
   dataBuffY_uV = new float[nchan][dataBuffX.length];
   dataBuffY_filtY_uV = new float[nchan][dataBuffX.length];
+  X_buff = new float[500];
+  Y_buff = new float[500];
+  Z_buff = new float[500];
   //data_std_uV = new float[nchan];
   data_elec_imp_ohm = new float[nchan];
   is_railed = new DataStatus[nchan];
@@ -405,6 +415,7 @@ void haltSystem() {
   curDataPacketInd = -1;
   lastReadDataPacketInd = -1;
   pointCounter = 0;
+  currentTableRowIndex = 0;
   prevBytes = 0; 
   prevMillis = millis();
   byteRate_perSec = 0;

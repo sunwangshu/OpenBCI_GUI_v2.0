@@ -168,7 +168,7 @@ public class OutputFile_rawtxt {
     if (output != null) {
       output.print(Integer.toString(data.sampleIndex));
       writeValues(data.values,scale_to_uV);
-      writeValues(data.auxValues,scale_for_aux);
+      writeAccValues(data.auxValues,scale_for_aux);
       output.print( ", " + dateFormat.format(date));
       output.println(); rowsWritten++;
       //output.flush();
@@ -183,6 +183,13 @@ public class OutputFile_rawtxt {
     }
   }
 
+  private void writeAccValues(int[] values, float scale_fac) {          
+    int nVal = values.length;
+    for (int Ival = 0; Ival < nVal; Ival++) {
+      output.print(", ");
+      output.print(String.format("%.3f", scale_fac * float(values[Ival])));
+    }
+  }
 
 
   public void closeFile() {

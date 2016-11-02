@@ -20,7 +20,7 @@ void process_input_file() throws Exception{
   
   try{
     while(!hasRepeated){
-      currentTableRowIndex=getPlaybackDataFromTable(playbackData_table, currentTableRowIndex, openBCI.get_scale_fac_uVolts_per_count(), dataPacketBuff[lastReadDataPacketInd]);
+      currentTableRowIndex=getPlaybackDataFromTable(playbackData_table, currentTableRowIndex, openBCI.get_scale_fac_uVolts_per_count(), openBCI.get_scale_fac_accel_G_per_count(), dataPacketBuff[lastReadDataPacketInd]);
     
       for (int Ichan=0; Ichan < nchan; Ichan++) {
         //scale the data into engineering units..."microvolts"
@@ -71,7 +71,7 @@ int getDataIfAvailable(int pointCounter) {
           synthesizeData(nchan, openBCI.get_fs_Hz(), openBCI.get_scale_fac_uVolts_per_count(), dataPacketBuff[lastReadDataPacketInd]);
           break;
         case DATASOURCE_PLAYBACKFILE:
-          currentTableRowIndex=getPlaybackDataFromTable(playbackData_table, currentTableRowIndex, openBCI.get_scale_fac_uVolts_per_count(), dataPacketBuff[lastReadDataPacketInd]);
+          currentTableRowIndex=getPlaybackDataFromTable(playbackData_table, currentTableRowIndex, openBCI.get_scale_fac_uVolts_per_count(), openBCI.get_scale_fac_accel_G_per_count(), dataPacketBuff[lastReadDataPacketInd]);
           break;
         default:
           //no action
@@ -163,6 +163,15 @@ void appendAndShift(float[] data, float[] newData) {
   }
 }
 
+void appendAndShiftAcc(float[] data, float newData) {
+  int nshift = 1;
+  int end = data.length-nshift;
+  for (int i=0; i < end; i++) {
+    data[i]=data[i+nshift];  //shift data points down by 1
+  }
+  data[end] = newData;  //append new data
+}
+
 final float sine_freq_Hz = 10.0f;
 float[] sine_phase_rad = new float[nchan];
 
@@ -230,8 +239,9 @@ void initializeFFTObjects(FFT[] fftBuff, float[][] dataBuffY_uV, int N, float fs
 }
 
 
-int getPlaybackDataFromTable(Table datatable, int currentTableRowIndex, float scale_fac_uVolts_per_count, DataPacket_ADS1299 curDataPacket) {
+int getPlaybackDataFromTable(Table datatable, int currentTableRowIndex, float scale_fac_uVolts_per_count, float scale_fac_accel_G_per_count, DataPacket_ADS1299 curDataPacket) {
   float val_uV = 0.0f;
+  float acc_G = 0.0f;
 
   //check to see if we can load a value from the table
   if (currentTableRowIndex >= datatable.getRowCount()) {
@@ -257,6 +267,43 @@ int getPlaybackDataFromTable(Table datatable, int currentTableRowIndex, float sc
       //put into data structure
       curDataPacket.values[Ichan] = (int) (0.5f+ val_uV / scale_fac_uVolts_per_count); //convert to counts, the 0.5 is to ensure rounding
     }
+    // get accelerometer data
+    for (int Iacc=0; Iacc < n_aux_ifEnabled; Iacc++) {
+      if (Iacc < datatable.getColumnCount()) {
+        acc_G = row.getFloat(Iacc + nchan);
+      } else {
+        //use zeros for bad data :)
+        acc_G = 0.0f;
+      }
+
+      //put into data structure
+      curDataPacket.auxValues[Iacc] = (int) (0.5f+ acc_G / scale_fac_accel_G_per_count); //convert to counts, the 0.5 is to ensure rounding
+      
+      //register in the acc buff
+      //if (curDataPacket.auxValues[Iacc]!= 0) {
+      //  validAuxValues[Iacc] = curDataPacket.auxValues[Iacc];
+      //  acc_newData = true;
+      //}
+      //else {
+      //  acc_newData = false;
+      //}
+      
+      if (acc_G!= 0) {
+        validAuxValues[Iacc] = acc_G;
+        acc_newData = true;
+      }
+      else {
+        acc_newData = false;
+      }
+    }
+    
+    if (isRunning & acc_newData) {
+      appendAndShiftAcc(X_buff, validAuxValues[0]);
+      appendAndShiftAcc(Y_buff, validAuxValues[1]);
+      appendAndShiftAcc(Z_buff, validAuxValues[2]);
+    }
+    
+    // get time stamp
     if(!isOldData) curTimestamp = row.getString(nchan+3);
     
     //int localnchan = nchan;
